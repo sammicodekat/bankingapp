@@ -2,6 +2,7 @@ const App = React.createClass({
     getInitialState() {
         return {
           transactions: [],
+          filtered: [],
           total :0,
         }
     },
@@ -85,9 +86,11 @@ class TransactionTable extends React.Component {
      });
  }
     render() {
-    const {transactions, removeTransaction,updateTotal} = this.props;
+    const {transactions, removeTransaction,updateTotal,total} = this.props;
     const {credit,debit} =this.state;
-    let filtered = transactions.filter(
+    let sum =0;
+    let filtered =[];
+    filtered = transactions.filter(
       (transaction) => {
         return transaction.description.indexOf(this.state.search) !== -1 ;
       }
@@ -140,7 +143,7 @@ class TransactionTable extends React.Component {
             </thead>
             <tbody>
                 {filtered.map(transaction => (
-                    <tr key={transaction.id} className={transaction.shouldHide}>
+                    <tr key={transaction.id}>
                         <td>{transaction.description}</td>
                         <td>{transaction.amount}</td>
                         <td>{transaction.date}</td>
@@ -176,7 +179,6 @@ const NewTransactionForm = React.createClass({
             description: description.value,
             id: uuid(),
             date: moment().format('MMMM Do YYYY, h:mm:ss a'),
-            shouldHide:'show'
         }
         this.props.addNewTransaction(transaction);
         this.props.updateTotal(am);
