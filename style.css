@@ -6,6 +6,7 @@ table.sortable thead {
 }
 
 .hidden { display:none; }
-.show{
-  display:block;
+
+.search{
+  margin-top:15px;
 }

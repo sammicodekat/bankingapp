@@ -3,9 +3,6 @@ const App = React.createClass({
         return {
           transactions: [],
           total :0,
-          credit:'show',
-          debit :'show',
-          filter:'total'
         }
     },
 
@@ -32,18 +29,6 @@ const App = React.createClass({
             total: total - amount
         });
     },
-    showDebit(amount) {
-        const {transactions} = this.state;
-        this.setState({
-            transactions: transactions.filter(transaction => transaction.amount < 0)
-        });
-    },
-    showCredit(amount) {
-        const {transactions} = this.state;
-        this.setState({
-            transactions: transactions.filter(transaction => transaction.amount > 0)
-        });
-    },
 
     render() {
         const {transactions,total} = this.state;
@@ -54,15 +39,6 @@ const App = React.createClass({
                     <div className="col-md-4">
                         <label className="control-label" htmlFor="balance">Account Balance</label>
                         <h3 id="balance" ref ="balance">{total}</h3>
-                    </div>
-                    <div className="col-md-4">
-                        <div className="pull-right">
-                            <div className="btn-group">
-                                <button type="button" className="btn btn-success btn-filter" onClick={this.showCredit} >Credit</button>
-                                <button type="button" className="btn btn-danger btn-filter" onClick={this.showDebit}>Debit</button>
-                                <button type="button" className="btn btn-warning btn-filter" data-target="pendiente">Total</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <NewTransactionForm addNewTransaction={this.addNewTransaction} updateTotal={this.updateTotal}/>
@@ -76,28 +52,83 @@ class TransactionTable extends React.Component {
   constructor(){
     super();
     this.state ={
-      search:''
+      search:'',
+      credit:'show',
+      debit:'show'
     };
   }
+
   updateSearch(event){
    this.setState({search:event.target.value.substr(0,20)})
-  }
+ }
+
+ showDebit() {
+     const {credit,debit} = this.state;
+     this.setState({
+         credit:'hide',
+         debit:'show'
+     });
+ }
+
+ showCredit() {
+     const {credit,debit} = this.state;
+     this.setState({
+         credit:'show',
+         debit:'hide'
+     });
+ }
+ showTotal() {
+     const {credit,debit} = this.state;
+     this.setState({
+         credit:'show',
+         debit:'show'
+     });
+ }
     render() {
     const {transactions, removeTransaction,updateTotal} = this.props;
+    const {credit,debit} =this.state;
     let filtered = transactions.filter(
       (transaction) => {
         return transaction.description.indexOf(this.state.search) !== -1 ;
       }
     );
+
+    if(credit=='hide')
+    {
+      filtered = transactions.filter(
+        (transaction) => {
+          return transaction.amount < 0 ;
+        })
+    }
+
+    if(debit=='hide')
+    {
+      filtered = transactions.filter(
+        (transaction) => {
+          return transaction.amount > 0 ;
+        })
+    }
+
     return (
       <div>
+        <div className ="row search">
+          <div className="col-md-4">
+              <div className="pull-left">
+                  <div className="btn-group">
+                      <button type="button" className="btn btn-success btn-filter" onClick={this.showCredit.bind(this)} >Credit</button>
+                      <button type="button" className="btn btn-danger btn-filter" onClick={this.showDebit.bind(this)}>Debit</button>
+                      <button type="button" className="btn btn-warning btn-filter" onClick={this.showTotal.bind(this)}>Total</button>
+                  </div>
+              </div>
+          </div>
         <div className="col-md-4">
-        <div className="form-group">
+        <div className="form-group pull-right">
             <label htmlFor="searchBar">Search:
             </label>
-            <input id='searchBar' type='text' value={this.state.search} onChange ={this.updateSearch.bind(this)}/>
+            <input id='searchBar' type='text' value={this.state.search} placeholder ="Search Description" onChange ={this.updateSearch.bind(this)}/>
         </div>
       </div>
+    </div>
         <table className="table sortable table-hover">
             <thead>
                 <tr>
