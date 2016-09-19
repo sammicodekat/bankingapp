@@ -72,9 +72,32 @@ const App = React.createClass({
     }
 })
 
-const TransactionTable = props => {
-    const {transactions, removeTransaction,updateTotal,filter} = props;
+class TransactionTable extends React.Component {
+  constructor(){
+    super();
+    this.state ={
+      search:''
+    };
+  }
+  updateSearch(event){
+   this.setState({search:event.target.value.substr(0,20)})
+  }
+    render() {
+    const {transactions, removeTransaction,updateTotal} = this.props;
+    let filtered = transactions.filter(
+      (transaction) => {
+        return transaction.description.indexOf(this.state.search) !== -1 ;
+      }
+    );
     return (
+      <div>
+        <div className="col-md-4">
+        <div className="form-group">
+            <label htmlFor="searchBar">Search:
+            </label>
+            <input id='searchBar' type='text' value={this.state.search} onChange ={this.updateSearch.bind(this)}/>
+        </div>
+      </div>
         <table className="table sortable table-hover">
             <thead>
                 <tr>
@@ -85,8 +108,8 @@ const TransactionTable = props => {
                 </tr>
             </thead>
             <tbody>
-                {transactions.map(transaction => (
-                    <tr key={transaction.id} className ={filter}>
+                {filtered.map(transaction => (
+                    <tr key={transaction.id} className={transaction.shouldHide}>
                         <td>{transaction.description}</td>
                         <td>{transaction.amount}</td>
                         <td>{transaction.date}</td>
@@ -96,9 +119,11 @@ const TransactionTable = props => {
                     </tr>
                 )
               )}
-            </tbody>
+          </tbody>
         </table>
+      </div>
     )
+  }
 }
 
 const NewTransactionForm = React.createClass({
@@ -120,6 +145,7 @@ const NewTransactionForm = React.createClass({
             description: description.value,
             id: uuid(),
             date: moment().format('MMMM Do YYYY, h:mm:ss a'),
+            shouldHide:'show'
         }
         this.props.addNewTransaction(transaction);
         this.props.updateTotal(am);

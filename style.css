@@ -4,3 +4,8 @@ table.sortable thead {
     font-weight: bold;
     cursor: default;
 }
+
+.hidden { display:none; }
+.show{
+  display:block;
+}
