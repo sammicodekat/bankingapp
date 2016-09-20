@@ -3,7 +3,9 @@ const App = React.createClass({
         return {
           transactions: [],
           filtered: [],
-          total :0,
+          total : 0,
+          credits: 0,
+          debits: 0
         }
     },
 
@@ -16,30 +18,59 @@ const App = React.createClass({
             ]
         })
     },
-    updateTotal(balance){
-      const {total} =this.state;
-      this.setState({
-          total: total+balance
-      })
+    updateTotal(balance,option){
+      const {total,debits,credits} =this.state;
+      if(option ==="debit")
+      {
+        this.setState({
+            debits: debits+balance,
+            total: total+balance
+        })
+      }
+      else
+      {
+        this.setState({
+            credits: credits+balance,
+            total: total+balance
+        })
+      }
     },
 
-    removeTransaction(id,amount) {
-        const {transactions,total} = this.state;
+    removeTransaction(id,amount,type) {
+        const {transactions,total,debits,credits} = this.state;
         this.setState({
             transactions: transactions.filter(transaction => transaction.id != id),
             total: total - amount
-        });
+        })
+        if (type == 'debit'){
+          this.setState({
+              debits: debits - amount
+          })
+        }
+        else{
+          this.setState({
+              credits: credits - amount
+          })
+        }
     },
 
     render() {
-        const {transactions,total} = this.state;
+        const {transactions,total,credits,debits} = this.state;
         return (
             <div className='well'>
                 <h1>Banking App</h1>
                 <div className="row">
-                    <div className="col-md-4">
+                    <div className="col-xs-4 col-md-3">
                         <label className="control-label" htmlFor="balance">Account Balance</label>
                         <h3 id="balance" ref ="balance">{total}</h3>
+                    </div>
+                    <div className="col-xs-4 col-md-3">
+                        <label className="control-label" htmlFor="cre">Total Credits</label>
+                        <h3 id="cre" >{credits}</h3>
+                    </div>
+                    <div className="col-xs-4 col-md-3">
+                        <label className="control-label" htmlFor="deb">Total Debits</label>
+                        <h3 id="deb" >{debits}</h3>
                     </div>
                 </div>
                 <NewTransactionForm addNewTransaction={this.addNewTransaction} updateTotal={this.updateTotal}/>
@@ -72,11 +103,11 @@ class TransactionTable extends React.Component {
  }
 
  showCredit() {
-     const {credit,debit} = this.state;
+     const {credit,debit} = this.state
      this.setState({
          credit:'show',
          debit:'hide'
-     });
+     })
  }
  showTotal() {
      const {credit,debit} = this.state;
@@ -89,8 +120,7 @@ class TransactionTable extends React.Component {
     const {transactions, removeTransaction,updateTotal,total} = this.props;
     const {credit,debit} =this.state;
     let sum =0;
-    let filtered =[];
-    filtered = transactions.filter(
+    let filtered = transactions.filter(
       (transaction) => {
         return transaction.description.indexOf(this.state.search) !== -1 ;
       }
@@ -115,7 +145,7 @@ class TransactionTable extends React.Component {
     return (
       <div>
         <div className ="row search">
-          <div className="col-md-4">
+          <div className="col-xs-6 col-md-4">
               <div className="pull-left">
                   <div className="btn-group">
                       <button type="button" className="btn btn-success btn-filter" onClick={this.showCredit.bind(this)} >Credit</button>
@@ -124,7 +154,7 @@ class TransactionTable extends React.Component {
                   </div>
               </div>
           </div>
-        <div className="col-md-4">
+        <div className="col-xs-6 col-md-4">
         <div className="form-group pull-right">
             <label htmlFor="searchBar">Search:
             </label>
@@ -148,7 +178,7 @@ class TransactionTable extends React.Component {
                         <td>{transaction.amount}</td>
                         <td>{transaction.date}</td>
                         <td>
-                            <button onClick={removeTransaction.bind(null, transaction.id,transaction.amount)} className="btn btn-sm btn-danger">X</button>
+                            <button onClick={removeTransaction.bind(null, transaction.id,transaction.amount,transaction.type)} className="btn btn-sm btn-danger">X</button>
                         </td>
                     </tr>
                 )
@@ -179,9 +209,10 @@ const NewTransactionForm = React.createClass({
             description: description.value,
             id: uuid(),
             date: moment().format('MMMM Do YYYY, h:mm:ss a'),
+            type: selectedOption
         }
         this.props.addNewTransaction(transaction);
-        this.props.updateTotal(am);
+        this.props.updateTotal(am,selectedOption);
     },
 
     handleOptionChange: function(changeEvent) {
@@ -192,7 +223,7 @@ const NewTransactionForm = React.createClass({
         return (
             <form onSubmit ={this.submitForm}>
                 <div className="row">
-                    <div className="col-md-4">
+                    <div className="col-md-4 col-xs-6">
                         <div className="form-group">
                             <label className="control-label" htmlFor="newAmount">Amount</label>
                             <div className="input-group">
@@ -220,14 +251,14 @@ const NewTransactionForm = React.createClass({
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-4 col-xs-6">
                         <div className="form-group">
                             <label htmlFor="newDescription">Description:
                             </label>
                             <input ref='description' type="text" className="form-control" id="newDescription" required/>
                         </div>
                     </div>
-                    <div className="col-md-4 text-center">
+                    <div className="col-md-4 col-xs-12  text-center">
                         <button className="btn btn-primary btn-block">Add</button>
                     </div>
 
